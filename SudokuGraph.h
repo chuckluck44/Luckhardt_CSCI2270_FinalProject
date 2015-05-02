@@ -31,7 +31,6 @@ struct adjVertex{
 
 //Possible value for an unsolved vertex
 struct pValue {
-    
     int value; //Set to an int 1-9 or zero if the vertex has an adjacent vertex that has been solved for that value
     
     //The number of adjacent vertices that cannot have this value
@@ -52,12 +51,11 @@ struct vertex{
 // Class stores graph class properties when auto solver guesses
 // so they can be restored in case the guess is wrong
 struct snapShot {
-    int step;
-    std::vector<vertex> vertices;
-    std::vector<int> unsolved;
-    int guessIdx;
-    std::queue<int> guessq;//Queue of all possible vertices that c
-    int lastpValueIdx;
+    int step; // Stores the current step
+    std::vector<vertex> vertices; //Stores graphs vertices vector at a point
+    std::vector<int> unsolved; //Stores graphs unsolved vector at a point
+    int guessIdx; //Index of the vertex that the program guessed the value of
+    int lastpValueIdx; //Index of pValue that was last guessed on
 };
 
 
