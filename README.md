@@ -2,7 +2,7 @@
 
 Project Summary:
 
-  This program is a text-based sudoku puzzle game/automatic solver. The program has several puzzles built in and gives the user the option to add in any more valid puzzle they find or create. The main function of the program is the automatic solver feature which will solve any valid puzzle that the user inputs and display the steps that it took. However, functionality to allow the users to attempt to solve the puzzles themselves has been added as well.
+-This program is a text-based sudoku puzzle game/automatic solver. The program has several puzzles built in and gives the user the option to add in any more valid puzzle they find or create. The main function of the program is the automatic solver feature which will solve any valid puzzle that the user inputs and display the steps that it took. However, functionality to allow the users to attempt to solve the puzzles themselves has been added as well.
 
 How to Run: 
 
@@ -22,19 +22,19 @@ How to Run:
 
 Dependencies: 
 
-  Requires C++ 11, fstream, iostream, and standard use library.
+-Requires C++ 11, fstream, iostream, and standard use library.
   
 
 System Requirements: 
 
-  Run using terminal on any machine.
+-Run using terminal on any machine.
   
 
 Group Members: 
 
-  Charley Luckhardt
+-Charley Luckhardt
   
   
 Open issues/bugs:
 
-  -Program does not always write user added puzzles to the Puzzle.txt file correctly
+-Program does not always write user added puzzles to the Puzzle.txt file correctly
