@@ -12,7 +12,7 @@ How to Run:
 
 3.) Compile the 'main.cpp' and 'SudokuGraph.ccp' files together by typing:
 
-    g++ Final_Project.cpp Chord_Guitar.cpp -std=c++11
+    g++ main.cpp SudokuGraph.cpp -std=c++11
     
 4.) Run the executable with the current directory as an argument by typing:
 
