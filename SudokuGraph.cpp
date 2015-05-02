@@ -674,7 +674,7 @@ void Graph::clearPuzzle() {
     vertices.clear();
     unsolved.clear();
     snapShots.clear();
-    moveList.clear()
+    moveList.clear();
 }
 
 
