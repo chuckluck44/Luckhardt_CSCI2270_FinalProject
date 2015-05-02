@@ -17,18 +17,23 @@
 
 using namespace std;
 
+//Helper functions
 void displayMenu();
+//Adds puzzles from Puzzle.txt into graph
 void readFileIntoGraph(Graph & sGraph, string fileName);
+//Writes user created puzzle to Puzzle.txt
 void writePuzzleIntoFile(string puzzle, string fileName);
+//Prompts user to solve puzzle
 void startSolving (Graph &sGraph);
+//Prompts user to build puzzle
 void buildPuzzle (Graph & sGraph, string filePath);
 
 int main(int argc, const char * argv[]) {
     
     Graph sGraph;
     
-    string filePath = "/Users/katiefrank/CSCI_Projects/Final2/Final2/Puzzles.txt";
-    //filePath += "/Puzzles.txt";
+    string filePath = argv[1];
+    filePath += "/Puzzles.txt";
     cout << filePath << endl;
     
     bool quit = false;
@@ -37,12 +42,13 @@ int main(int argc, const char * argv[]) {
     
     readFileIntoGraph(sGraph, filePath);
     
+    //Initial puzzle selection
     cout << "WELCOME TO SUDOKU SOLVER!" << endl;
     cout << "=========================" << endl;
     cout << endl;
     cout << "Would you like to..." << endl;
     cout << "1. Select a pre-made puzzle" << endl;
-    cout << "2. Add in another valid puzzle" << endl;
+    cout << "2. Add in your own puzzle" << endl;
     
     cin >> input;
     
@@ -60,6 +66,7 @@ int main(int argc, const char * argv[]) {
             cin.clear();
             cin.ignore(1000,'\n');
             
+            //Set to selected puzzle
             sGraph.resetPuzzle(input2 - 1);
             sGraph.printPuzzle(0, sGraph.currentPuzzle);
             break;
@@ -69,7 +76,8 @@ int main(int argc, const char * argv[]) {
             break;
             
         default:
-            
+            sGraph.resetPuzzle(0);
+            sGraph.printPuzzle(0, sGraph.currentPuzzle);
             break;
     }
     
@@ -161,11 +169,12 @@ void startSolving (Graph &sGraph) {
     int loop = 0;
     
     while (inValue != "s" && inRow != "s" && inCol != "s") {
-        if (loop > 0) {
+        if (loop > 0) { //User has pressed 'u' for undo
             loop--;
             sGraph.undoMove();
             sGraph.printPuzzle(loop, sGraph.currentPuzzle);
         }
+        //Get values for value, row, and column
         while (true) {
             cout << "Enter 'u' to undo your last move or 's' to stop solving" << endl;
             cout << "Enter value:  " << endl;
@@ -183,12 +192,14 @@ void startSolving (Graph &sGraph) {
             if (inRow == "s") break;
             else if (inCol == "u") break;
             
+            //Makes move if valid if not returns false
             bool isValid = sGraph.makeMove(atoi(inValue.c_str()), atoi(inRow.c_str()), atoi(inCol.c_str()));
             if(!isValid) {
                 cout << "Not a valid move! Please try again" << endl;
             }else {
                 loop++;
                 sGraph.printPuzzle(loop, sGraph.currentPuzzle);
+                //Check if all values are solved
                 if (sGraph.checkForWin()) {
                     cout << "You solved the puzzle!!"<< endl;
                     return;
@@ -250,6 +261,7 @@ void buildPuzzle (Graph & sGraph, string filePath) {
     cout << "'0' represents a space when entering in the rows" << endl;
     cout << "Enter 'c' at any time to cancel" << endl;
     
+    //Iterate through each row
     for (int row = 0; row < 9; row++) {
         
         if (inRow == "c") {
@@ -270,6 +282,7 @@ void buildPuzzle (Graph & sGraph, string filePath) {
             }
             else {
                 validEntry = true;
+                //Check each value in row
                 for (int col = 0; col < 9; col++)
                 {
                     int value = inRow[col] - '0';
@@ -280,12 +293,14 @@ void buildPuzzle (Graph & sGraph, string filePath) {
                         nonZeros -= col;
                         validEntry = false;
                         cout << "Row cannot contain negative values or values above 9. Please retry" << endl;
+                        break;
                     }
                 }
-                if (validEntry == true) p += inRow;;
+                if (validEntry == true) p += inRow;; //Add row to puzzle
             }
         }
     }
+    //Add edges
     sGraph.addEdges();
     
     if (nonZeros < 10) {
@@ -299,7 +314,7 @@ void buildPuzzle (Graph & sGraph, string filePath) {
     }else if (inRow != "c") {
         writePuzzleIntoFile(p, filePath);
         sGraph.puzzles.push_back(p);
-        sGraph.currentPuzzle = sGraph.puzzles.size() - 1;
+        sGraph.currentPuzzle = sGraph.puzzles.size() - 1;//Set the current puzzle as this puzzle
         sGraph.printPuzzle(0, sGraph.currentPuzzle);
         cout << "Puzzle added to selection" << endl;
         cout << endl;
