@@ -161,6 +161,27 @@ bool Graph::checkForWin() {
     return true;
 }
 
+/*
+Function prototype:
+void Graph::solvePuzzle()
+
+Function description:
+This is the main function that auto solves the puzzle. It use several helper functions to do this including-
+void Graph::dequeuePossibleSolutions(int &step)
+void Graph::enqueuePossibleSolutions(int step, int guessIdx) 
+void Graph::compareVertices()
+void Graph::comparePossibleValues(vertex *v)
+void Graph::getPossibleValues(vertex *v)
+void Graph::vertexValueSolved(vertex *v, int value)
+See below for method details
+
+Example:
+HashTable ht;
+ht.deleteMovie("The Usual Suspects")
+
+Precondition: Puzzle is reset to stock state with no user answers.
+Post condition: All puzzle vertices have been solved with a value
+*/
 void Graph::solvePuzzle()
 {
     //Get possible values for vertices
@@ -168,50 +189,47 @@ void Graph::solvePuzzle()
         getPossibleValues(&vertices[unsolved[i]]);
     }
     
-    int step = 0;
-    int j;
-    int zeroCount;
-    vector<int> nzVals;
+    int step = 0; //Counts what step the solvers on
+    int j;//count for possible values (1-9)
+    int zeroCount;//Counts the number of possible values for a vertex that have been eliminated
     
-    int failCount = 0;
-    int guess = 0;
-    int inguess = 0;
+    int failCount = 0;//counts the number have times the times has failed to solve/guess a vertex
     
-    int fVal = 0;
+    int fVal = 0;//Stores non zero possible values in the case 8 other possible values have been eliminated
     
     
     while (unsolved.empty() != true) {
         int sizeCheck = unsolved.size();
         
-        queue<int> guessq;
-        
         for(int i = 0; i < unsolved.size(); i++) {
             
-            compareVertices();
+            compareVertices();//See function description below
             
             zeroCount = 0;
             j = 0;
             
+            //Iterate through each possible value
             while (j < 9) {
                 
                 pValue *pVal = &vertices[unsolved[i]].possibleValues[j];
                 
-                if (vertices[unsolved[i]].possibleValues[j].value == 0) {
+                if (vertices[unsolved[i]].possibleValues[j].value == 0) {//If value not possible
                     zeroCount ++;
                 }else {
-                    
+                    //Store the possible value
                     fVal = j+1;
                     
-                    //checks if all squares in vertex row, column or section are restricted from a possible value
+                    //checks if all adjacent squares in the vertex's row, column or section are restricted from this possible value
                     if (pVal->secConflicts == 8 || pVal->colConflicts == 8 || pVal->colConflicts == 8) {
                         
+                        //Solve vertex and print puzzle
                         vertexValueSolved(&vertices[unsolved[i]], j + 1);
                         step++;
                         printPuzzle(step, currentPuzzle);
                         cout << j + 1 << " placed at row: " << vertices[unsolved[i]].row + 1 ;
                         cout << " column: " << vertices[unsolved[i]].column + 1 << endl;
                         
-                        //Erase and decrement 'i'
+                        //Erase and decrement 'i' so we remain at the correct position in the unsolved vector
                         unsolved.erase(unsolved.begin() + i);
                         i--;
                         
@@ -219,10 +237,11 @@ void Graph::solvePuzzle()
                     }
                 }
                 
-                //If there are no possible values for a vertex incorrect guess was made
+                //If there are no possible values for a vertex puzzle is impossible and incorrect guess was made
                 if (zeroCount == 9) {
-                    dequeuePossibleSolutions(step);
-                    inguess++;
+                    dequeuePossibleSolutions(step);//See description below
+                    
+                    //if snap shot queue is empty the puzzle is impossible
                     if (step == 0) {
                         cout << "Puzzle has no solution... " << unsolved.size() << " missing values."<< endl;
                         cout << endl;
@@ -231,18 +250,25 @@ void Graph::solvePuzzle()
                     break;
                 }
                 
-                //Adjust number of possible values required to solve a vertex if no vertices were solved previous loop (GUESS)
+                /*Checks the number of possible values that exist for the vertex.
+                The larger the number of times the program has solved/guessed a vertex value the 
+                more possible values a vertex can have to be guessed on.
+                ex:
+                - failCount = 1 there is no vertex with one possible solution vertex can now have two possible solutions
+                            (8 - failCount) = 7 or 7 eliminated solutions out of 9
+                - failCount = 2 there is no vertex with one possible solution vertex can now have tree possible solutions 
+                            (8 - failCount) = 6 or 6 eliminated solutions out of 9
+                */
                 else if (j == 8 && zeroCount == 8 - failCount) {
                     
+                    //If program has failed already vertex contains atleast two possible solutions. Guess must be made
                     if (failCount > 0) {
                         //Enqueue this vertex as a guess
                         enqueuePossibleSolutions(step, unsolved[i]);
-                        guess++;
-                        
-                        //Reset fail count
+                        //Vertex has been guessed reset fail count
                         failCount = 0;
                     }
-                    
+                    //Vertex only has one possible solution so solve
                     else {
                         vertexValueSolved(&vertices[unsolved[i]], fVal);
                         step++;
@@ -260,11 +286,11 @@ void Graph::solvePuzzle()
             }
         }
         
-        //Check if any vertices were solved and if
+        //Check if no vertices were solved
         if (unsolved.size() == sizeCheck) {
             failCount ++;
             
-            if (failCount == 9) {
+            if (failCount == 9) { //Shouldnt happen but to keep the program from running forever
                 cout << "ERROR: " << failCount << endl;
                 cout << "Could not solve puzzle... " << unsolved.size() << " missing values."<< endl;
                 cout << endl;
@@ -273,13 +299,30 @@ void Graph::solvePuzzle()
         }
     }
     
+    //unsolved vector is empty puzzle solved
     printPuzzle(0, currentPuzzle);
     cout << "Puzzle solved!!! - " << step << " steps" << endl;
     cout << endl;
 }
 
 
-//Restores graph to its previous state and dequeues the next possible guess at that point
+/*
+Function prototype:
+void Graph::dequeuePossibleSolutions(int &step)
+
+Function description:
+Dequeues most recent snapshot and restores the vertices vector and unsolved vector to their state at the point of the guess.
+Gets the vertex that was guessed on (using guessIdx) and resumes iteration over at the last guessed value (using lastpValueIdx) and will check the next possible value.
+If no other possible value exists for that vertex, snapshot is removed and the process is repeated for the previous snapshot.
+The variable step in only in the scope of the function so it is entered as a constant argument.
+
+Example:
+SudokuGraph g;
+g.dequeuePossibleSolutions(1)
+
+Precondition: snapshot vector is not empty. Guess has been made on some vertex.
+Post condition: Graph is restored to a previous state. And previously guessed vertex has been solved with a new value
+*/
 void Graph::dequeuePossibleSolutions(int &step) {
     cout << "Guess failed... going back to step "<< snapShots.back().step << " and making a different one" << endl;
 
@@ -318,7 +361,24 @@ void Graph::dequeuePossibleSolutions(int &step) {
     return;
 }
 
-//Stores graphs current state and enques all possible guesses at that point
+/*
+Function prototype:
+void Graph::enqueuePossibleSolutions(int step, int guessIdx)
+
+Function description:
+Stores current state of graph(vertices vector and unsolved vector), current step and the idx of the vertex that its making a guess on(guessIdx) in a snapShot struct.
+Adds the snapShot struct to the Graph class snapshots vector.
+It then iterates over the possible values and stores the index of first one available in "lastpValueIdx"
+Then solves the vertex for that value using void Graph::vertexValueSolved(vertex *v, int value) and returns.
+The variable step in only in the scope of the function so it is entered as a constant argument.
+
+Example:
+SudokuGraph g;
+g.enqueuePossibleSolutions(10, 25)
+
+Precondition: Vertex with correct number of possible values has been found and its index is passed with the step.
+Post condition: A vertex is now solved and its possible values updated
+*/
 void Graph::enqueuePossibleSolutions(int step, int guessIdx) {
     cout << "Making a guess!!" << endl;
     snapShot ss;
@@ -341,9 +401,27 @@ void Graph::enqueuePossibleSolutions(int step, int guessIdx) {
     }
 }
 
+/*
+Function prototype:
+void Graph::compareVertices()
+
+Function description:
+Compares the possible values of all vertices and their adjacent vertices using the helper function void Graph::comparePossibleValues(vertex *v) *details below
+It does a a sort of bftraversal but instead of queueing vertices it pulls them from the graphs unsolved vector since we do not need to update solved vertices.
+For an unsolved vertex it checks all adj vertices possible values
+    -If an adj vertex is solved it sets the value of that possible value for the unsolved vertex to zero
+    -For adj vertices that are unsolved or solved it compares the possible values to the vertex's possible values and updates the row, columns, and section conflicts accordingly
+        -if the vertexs pvalue is possible and the adj vertex is not, the vertex pvalue contflict count is incremented
+        -if the vertexs pvalue is not possible and the adj vertex is, the adj vertex pvalue contflict count is incremented
+        -if both are impossible/possible nothing is incremented
+Vertex is set to checked so that when adj unsolved verices wont compare twice
+
+Precondition: Graph::getPossibleValues(vertex *v) has been run so that all vertices possible values have been set
+Post condition: All vertices have up to date possible values and conflict counts
+*/
 void Graph::compareVertices() {
     
-    //Set all vertices to unchecked and reset adjacent conflicts to zero
+    //Set all vertices to unchecked and their adjacent conflicts to zero
     for (int i = 0; i < vertices.size(); i++) {
         vertices[i].checked = false;
         for (int j = 0; j < 9; j++) {
@@ -353,7 +431,7 @@ void Graph::compareVertices() {
             pvals->secConflicts = 0;
         }
     }
-    
+    //iterate through unsolved vertices
     for (int i = 0; i < unsolved.size() ; i++) {
         
         //Find value conflicts with adjacent vertices
