@@ -23,14 +23,17 @@ How to Run:
 Dependencies: 
 
   Requires C++ 11, fstream, iostream, and standard use library.
+  
 
 System Requirements: 
 
   Run using terminal on any machine.
+  
 
 Group Members: 
 
   Charley Luckhardt
+  
   
 Open issues/bugs:
 
