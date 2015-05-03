@@ -6,7 +6,7 @@ Project Summary:
 
 How to Run: 
 
-1.) Clone the file directory and extract all of the files into a separate folder
+1.) Clone the file directory and extract all of the files into a separate folder. Make sure all the files, including 'Puzzles.txt', are in the same folder!
 
 2.) In the terminal, navigate to the directory where the files are stored
 
